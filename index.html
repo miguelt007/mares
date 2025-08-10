@@ -14,8 +14,8 @@
 
   <label for="local">Escolhe uma praia:</label>
   <select id="local">
-    <option value="38.6577,-9.1946">Costa da Caparica</option>
     <option value="39.6022,-9.0726">Peniche</option>
+    <option value="38.6577,-9.1946">Costa da Caparica</option>
     <option value="39.6028,-9.0700">Nazaré</option>
     <option value="37.0179,-7.9333">Praia da Rocha</option>
     <option value="38.5244,-8.8926">Comporta</option>
@@ -37,7 +37,12 @@
         const res = await fetch(url);
         const data = await res.json();
 
-        // Usar o primeiro valor disponível do dia
+        // Verifica se há dados
+        if (!data.hourly || !data.hourly.wave_height || data.hourly.wave_height.length === 0) {
+          document.getElementById("dados").innerHTML = `<p>⚠️ Sem dados disponíveis para esta localização.</p>`;
+          return;
+        }
+
         const info = {
           ondas: data.hourly.wave_height[0],
           tempAgua: data.hourly.water_temperature[0],
