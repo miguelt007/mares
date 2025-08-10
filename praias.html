@@ -1,104 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
-  <title>Marés em Portugal</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <meta charset="UTF-8">
+  <title>Marés nas Praias de Portugal</title>
   <style>
-    #map { height: 100vh; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      padding: 20px;
+    }
+    h1 {
+      color: #005f73;
+    }
+    .praia {
+      background: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .praia a {
+      color: #0077b6;
+      text-decoration: none;
+    }
+    .praia a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-  <div id="map"></div>
+  <h1>🌊 Marés nas Praias de Portugal</h1>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <div id="praias"></div>
+
   <script>
-    const map = L.map('map').setView([39.5, -8.0], 7);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    const marAltaIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2933/2933825.png',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32]
-    });
-
-    const marBaixaIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2933/2933826.png',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32]
-    });
-
-    function horaParaMinutos(horaStr) {
-      const [h, m] = horaStr.split(':').map(Number);
-      return h * 60 + m;
-    }
-
-    const agora = new Date();
-    const horaAtualMin = agora.getHours() * 60 + agora.getMinutes();
-
-    const linksLocais = {
-      "Lisboa": "https://tabuademares.com/pt/lisboa",
-      "Cascais": "https://tabuademares.com/pt/cascais",
-      "Costa da Caparica": "https://tabuademares.com/pt/costa-da-caparica",
-      "Setúbal": "https://tabuademares.com/pt/setubal",
-      "Sines": "https://tabuademares.com/pt/sines",
-      "Peniche": "https://tabuademares.com/pt/peniche",
-      "Ericeira": "https://tabuademares.com/pt/ericeira",
-      "Figueira da Foz": "https://tabuademares.com/pt/figueira-da-foz",
-      "Aveiro": "https://tabuademares.com/pt/aveiro",
-      "Porto": "https://tabuademares.com/pt/porto",
-      "Viana do Castelo": "https://tabuademares.com/pt/viana-do-castelo",
-      "Portimão": "https://tabuademares.com/pt/portimao",
-      "Tavira": "https://tabuademares.com/pt/tavira",
-      "Ponta Delgada": "https://tabuademares.com/pt/ponta-delgada",
-      "Funchal": "https://tabuademares.com/pt/funchal"
-    };
-
     const locais = [
-      { nome: "Lisboa", lat: 38.7169, lon: -9.1399, preia: "02:02", baixa: "07:09", altura: "2.72m" },
-      { nome: "Cascais", lat: 38.6979, lon: -9.4204, preia: "02:10", baixa: "07:18", altura: "2.65m" },
-      { nome: "Costa da Caparica", lat: 38.6333, lon: -9.2333, preia: "02:05", baixa: "07:12", altura: "2.70m" },
-      { nome: "Setúbal", lat: 38.5244, lon: -8.8926, preia: "02:15", baixa: "07:25", altura: "2.60m" },
-      { nome: "Sines", lat: 37.9561, lon: -8.8691, preia: "02:20", baixa: "07:30", altura: "2.55m" },
-      { nome: "Peniche", lat: 39.3558, lon: -9.3811, preia: "01:58", baixa: "07:05", altura: "2.75m" },
-      { nome: "Ericeira", lat: 38.9667, lon: -9.4167, preia: "02:00", baixa: "07:08", altura: "2.73m" },
-      { nome: "Figueira da Foz", lat: 40.1500, lon: -8.8667, preia: "01:50", baixa: "07:00", altura: "2.80m" },
-      { nome: "Aveiro", lat: 40.6405, lon: -8.6538, preia: "01:45", baixa: "06:55", altura: "2.85m" },
-      { nome: "Porto", lat: 41.1496, lon: -8.6109, preia: "01:40", baixa: "06:50", altura: "2.90m" },
-      { nome: "Viana do Castelo", lat: 41.6935, lon: -8.8329, preia: "01:35", baixa: "06:45", altura: "2.92m" },
-      { nome: "Portimão", lat: 37.1333, lon: -8.5333, preia: "02:25", baixa: "07:35", altura: "2.50m" },
-      { nome: "Tavira", lat: 37.1259, lon: -7.6455, preia: "02:30", baixa: "07:40", altura: "2.45m" },
-      { nome: "Ponta Delgada", lat: 37.7412, lon: -25.6756, preia: "03:00", baixa: "08:00", altura: "2.20m" },
-      { nome: "Funchal", lat: 32.6669, lon: -16.9241, preia: "03:10", baixa: "08:10", altura: "2.10m" }
+      { nome: "Lisboa", distrito: "lisboa", lat: 38.7169, lon: -9.1399, preia: "02:02", baixa: "07:09", altura: "2.72m" },
+      { nome: "Cascais", distrito: "lisboa", lat: 38.6979, lon: -9.4204, preia: "02:10", baixa: "07:18", altura: "2.65m" },
+      { nome: "Costa da Caparica", distrito: "setubal", lat: 38.6333, lon: -9.2333, preia: "02:05", baixa: "07:12", altura: "2.70m" },
+      { nome: "Setúbal", distrito: "setubal", lat: 38.5244, lon: -8.8926, preia: "02:15", baixa: "07:25", altura: "2.60m" },
+      { nome: "Sines", distrito: "setubal", lat: 37.9561, lon: -8.8691, preia: "02:20", baixa: "07:30", altura: "2.55m" },
+      { nome: "Peniche", distrito: "leiria", lat: 39.3558, lon: -9.3811, preia: "01:58", baixa: "07:05", altura: "2.75m" },
+      { nome: "Ericeira", distrito: "lisboa", lat: 38.9667, lon: -9.4167, preia: "02:00", baixa: "07:08", altura: "2.73m" },
+      { nome: "Figueira da Foz", distrito: "coimbra", lat: 40.1500, lon: -8.8667, preia: "01:50", baixa: "07:00", altura: "2.80m" },
+      { nome: "Aveiro", distrito: "aveiro", lat: 40.6405, lon: -8.6538, preia: "01:45", baixa: "06:55", altura: "2.85m" },
+      { nome: "Porto", distrito: "porto", lat: 41.1496, lon: -8.6109, preia: "01:40", baixa: "06:50", altura: "2.90m" },
+      { nome: "Viana do Castelo", distrito: "viana-do-castelo", lat: 41.6935, lon: -8.8329, preia: "01:35", baixa: "06:45", altura: "2.92m" },
+      { nome: "Portimão", distrito: "faro", lat: 37.1333, lon: -8.5333, preia: "02:25", baixa: "07:35", altura: "2.50m" },
+      { nome: "Tavira", distrito: "faro", lat: 37.1259, lon: -7.6455, preia: "02:30", baixa: "07:40", altura: "2.45m" },
+      { nome: "Ponta Delgada", distrito: "acores", lat: 37.7412, lon: -25.6756, preia: "03:00", baixa: "08:00", altura: "2.20m" },
+      { nome: "Funchal", distrito: "madeira", lat: 32.6669, lon: -16.9241, preia: "03:10", baixa: "08:10", altura: "2.10m" }
     ];
 
+    const container = document.getElementById("praias");
+
     locais.forEach(local => {
-      const preiaMin = horaParaMinutos(local.preia);
-      const baixaMin = horaParaMinutos(local.baixa);
+      const nomeFormatado = local.nome.toLowerCase().replace(/ /g, '-');
+      const link = `https://tabuademares.com/pt/${local.distrito}/${nomeFormatado}`;
 
-      const diffPreia = Math.abs(horaAtualMin - preiaMin);
-      const diffBaixa = Math.abs(horaAtualMin - baixaMin);
-
-      const estaEm = diffPreia < diffBaixa ? "Maré Alta" : "Maré Baixa";
-      const iconEscolhido = diffPreia < diffBaixa ? marAltaIcon : marBaixaIcon;
-      const link = linksLocais[local.nome] || "#";
-
-      const popupContent = `
-        <strong>${local.nome}</strong><br>
-        Estado atual: <b>${estaEm}</b><br>
-        Preia-mar: ${local.preia}<br>
-        Baixa-mar: ${local.baixa}<br>
-        Altura atual: ${local.altura}<br>
-        <a href="${link}" target="_blank">Ver mais</a>
+      const div = document.createElement("div");
+      div.className = "praia";
+      div.innerHTML = `
+        <h2>${local.nome}</h2>
+        <p><strong>📍 Coordenadas:</strong> ${local.lat}, ${local.lon}</p>
+        <p><strong>🌊 Preia-mar:</strong> ${local.preia} &nbsp; | &nbsp; <strong>Baixa-mar:</strong> ${local.baixa}</p>
+        <p><strong>📏 Altura da maré:</strong> ${local.altura}</p>
+        <p><a href="${link}" target="_blank">🔗 Ver detalhes da maré</a></p>
       `;
-      L.marker([local.lat, local.lon], { icon: iconEscolhido }).addTo(map)
-        .bindPopup(popupContent);
+      container.appendChild(div);
     });
   </script>
 </body>
