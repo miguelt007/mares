@@ -17,6 +17,11 @@
     <option value="38.6577,-9.1946">Costa da Caparica</option>
     <option value="39.6022,-9.0726">Peniche</option>
     <option value="39.6028,-9.0700">Nazaré</option>
+    <option value="37.0179,-7.9333">Praia da Rocha</option>
+    <option value="38.5244,-8.8926">Comporta</option>
+    <option value="41.1832,-8.6885">Matosinhos</option>
+    <option value="38.7000,-9.4167">Praia Grande</option>
+    <option value="39.5500,-8.9833">São Martinho do Porto</option>
   </select>
   <button onclick="buscarDados()">Ver condições</button>
 
@@ -28,23 +33,28 @@
       const [lat, lon] = coords.split(",");
       const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,water_temperature,wind_speed,wind_direction&timezone=auto`;
 
-      const res = await fetch(url);
-      const data = await res.json();
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
 
-      const horaAtual = new Date().getHours();
-      const info = {
-        ondas: data.hourly.wave_height[horaAtual],
-        tempAgua: data.hourly.water_temperature[horaAtual],
-        vento: data.hourly.wind_speed[horaAtual],
-        direcaoVento: data.hourly.wind_direction[horaAtual]
-      };
+        // Usar o primeiro valor disponível do dia
+        const info = {
+          ondas: data.hourly.wave_height[0],
+          tempAgua: data.hourly.water_temperature[0],
+          vento: data.hourly.wind_speed[0],
+          direcaoVento: data.hourly.wind_direction[0],
+          hora: data.hourly.time[0]
+        };
 
-      document.getElementById("dados").innerHTML = `
-        <h2>🌍 Dados para esta hora</h2>
-        <p><strong>Altura das ondas:</strong> ${info.ondas} m</p>
-        <p><strong>Temperatura da água:</strong> ${info.tempAgua} °C</p>
-        <p><strong>Vento:</strong> ${info.vento} km/h (${info.direcaoVento}°)</p>
-      `;
+        document.getElementById("dados").innerHTML = `
+          <h2>📅 Dados para ${info.hora}</h2>
+          <p><strong>Altura das ondas:</strong> ${info.ondas} m</p>
+          <p><strong>Temperatura da água:</strong> ${info.tempAgua} °C</p>
+          <p><strong>Vento:</strong> ${info.vento} km/h (${info.direcaoVento}°)</p>
+        `;
+      } catch (error) {
+        document.getElementById("dados").innerHTML = `<p>❌ Erro ao obter dados. Tenta novamente mais tarde.</p>`;
+      }
     }
   </script>
 </body>
