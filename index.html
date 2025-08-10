@@ -35,9 +35,9 @@
 
   <label for="praiaSelector">Escolhe a praia:</label>
   <select id="praiaSelector">
-    <option value="38.6765,-9.3225">Praia da Torre</option>
-    <option value="38.6790,-9.3300">Praia de Santo Amaro</option>
-    <option value="38.6930,-9.3190">Praia de Carcavelos</option>
+    <option value="38.6765,-9.3225,Praia da Torre">Praia da Torre</option>
+    <option value="38.6790,-9.3300,Praia de Santo Amaro">Praia de Santo Amaro</option>
+    <option value="38.6930,-9.3190,Praia de Carcavelos">Praia de Carcavelos</option>
   </select>
 
   <div id="tideData">
@@ -50,18 +50,24 @@
     const apiKey = "bc935843-d537-441f-8524-c2cf2150f46d"; // substitui pela tua chave da WorldTides
     let tideChart;
 
-    async function fetchTideData(lat, lon) {
+    // Estações conhecidas
+    const stations = {
+      "Praia da Torre": { lat: 38.6833, lon: -9.3000, name: "Paço de Arcos" },
+      "Praia de Santo Amaro": { lat: 38.6833, lon: -9.3000, name: "Paço de Arcos" },
+      "Praia de Carcavelos": { lat: 38.7000, lon: -9.4167, name: "Cascais" }
+    };
+
+    async function fetchTideData(stationLat, stationLon, praiaNome, stationNome) {
       const today = new Date();
       const startDate = today.toISOString().split('T')[0];
-      const endDate = new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-      const url = `https://www.worldtides.info/api/v3?extremes&height&start=${startDate}&length=72&lat=${lat}&lon=${lon}&key=${apiKey}`;
+      const url = `https://www.worldtides.info/api/v3?extremes&height&start=${startDate}&length=72&lat=${stationLat}&lon=${stationLon}&key=${apiKey}`;
 
       const response = await fetch(url);
       const data = await response.json();
 
-      // Mostrar extremos
-      let html = `<h2>Dados de Marés</h2><p><strong>Localização:</strong> ${lat}, ${lon}</p>`;
+      let html = `<h2>${praiaNome}</h2>`;
+      html += `<p><strong>Dados fornecidos pela estação:</strong> ${stationNome}</p>`;
+
       if (data.extremes) {
         data.extremes.forEach(tide => {
           const hora = new Date(tide.date).toLocaleString();
@@ -70,9 +76,10 @@
       } else {
         html += `<p>Sem dados de extremos disponíveis.</p>`;
       }
+
       document.getElementById('tideData').innerHTML = html;
 
-      // Preparar dados para gráfico
+      // Gráfico
       if (data.heights) {
         const labels = data.heights.map(h => new Date(h.date).toLocaleString());
         const values = data.heights.map(h => h.height);
@@ -114,17 +121,18 @@
       }
     }
 
-    function updateTideData(lat, lon) {
-      fetchTideData(lat, lon);
+    function updateTideData(lat, lon, praiaNome) {
+      const station = stations[praiaNome];
+      fetchTideData(station.lat, station.lon, praiaNome, station.name);
     }
 
     document.getElementById('praiaSelector').addEventListener('change', function () {
-      const [lat, lon] = this.value.split(',');
-      updateTideData(lat, lon);
+      const [lat, lon, praiaNome] = this.value.split(',');
+      updateTideData(lat, lon, praiaNome);
     });
 
     // Carrega dados iniciais da Praia da Torre
-    updateTideData(38.6765, -9.3225);
+    updateTideData(38.6765, -9.3225, "Praia da Torre");
   </script>
 </body>
 </html>
