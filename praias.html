@@ -139,7 +139,7 @@
       document.getElementById("praias").appendChild(div);
     });
 
-    // Alternância de modo
+        // Alternância de modo
     const toggleBtn = document.getElementById("toggle");
     toggleBtn.addEventListener("click", () => {
       const body = document.body;
@@ -157,30 +157,25 @@
       }
     });
 
-    // Fase da Lua automática com emoji, percentagem e nome
+    // Fase da Lua automática com emoji, nome e percentagem
     function calcularFaseLua() {
       const hoje = new Date();
-      let ano = hoje.getFullYear(), mes = hoje.getMonth() + 1, dia = hoje.getDate();
-      if (mes < 3) { ano--; mes += 12; }
-      mes++;
-      const c = 365.25 * ano;
-      const e = 30.6 * mes;
-      let jd = c + e + dia - 694039.09;
-      jd /= 29.5305882;
-      const b = parseInt(jd);
-      jd -= b;
-      const percent = Math.round(jd * 100);
+      const novaLua = new Date(Date.UTC(2000, 0, 6, 18, 14)); // referência: Lua Nova
+      const diff = hoje.getTime() - novaLua.getTime();
+      const dias = diff / 1000 / 86400;
+      const fase = (dias % 29.530588853);
+      const iluminacao = Math.round((1 - Math.cos((fase / 29.53) * 2 * Math.PI)) * 50);
 
       let emoji = "🌑", nome = "Lua Nova";
-      if (percent >= 0 && percent < 12) { emoji = "🌒"; nome = "Crescente"; }
-      else if (percent >= 12 && percent < 25) { emoji = "🌓"; nome = "Quarto Crescente"; }
-      else if (percent >= 25 && percent < 50) { emoji = "🌔"; nome = "Gibosa Crescente"; }
-      else if (percent >= 50 && percent < 75) { emoji = "🌖"; nome = "Gibosa Minguante"; }
-      else if (percent >= 75 && percent < 88) { emoji = "🌗"; nome = "Quarto Minguante"; }
-      else if (percent >= 88 && percent < 99) { emoji = "🌘"; nome = "Minguante"; }
-      else { emoji = "🌕"; nome = "Lua Cheia"; }
+      if (iluminacao < 2) { emoji = "🌑"; nome = "Lua Nova"; }
+      else if (iluminacao < 25) { emoji = "🌒"; nome = "Crescente"; }
+      else if (iluminacao < 50) { emoji = "🌓"; nome = "Quarto Crescente"; }
+      else if (iluminacao < 75) { emoji = "🌔"; nome = "Gibosa Crescente"; }
+      else if (iluminacao < 98) { emoji = "🌕"; nome = "Lua Cheia"; }
+      else if (iluminacao < 100) { emoji = "🌖"; nome = "Gibosa Minguante"; }
+      else { emoji = "🌗"; nome = "Quarto Minguante"; }
 
-      return `${emoji} ${nome} (${percent}%)`;
+      return `${emoji} ${nome} (${iluminacao}%)`;
     }
 
     document.getElementById("lua").textContent = calcularFaseLua();
