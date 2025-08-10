@@ -2,12 +2,13 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>🌊 Marés nas Praias de Portugal</title>
+  <title>Marés nas Praias de Portugal</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
+      transition: background 0.3s, color 0.3s;
     }
     #map {
       height: 500px;
@@ -20,6 +21,12 @@
       padding: 15px;
       margin-bottom: 15px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: background 0.3s, color 0.3s;
+    }
+    .emoji-icon {
+      font-size: 28px;
+      text-align: center;
+      line-height: 32px;
     }
     #controls {
       display: flex;
@@ -28,6 +35,13 @@
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
+    #toggle {
+      padding: 8px 16px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
     #lua {
       font-size: 20px;
       font-weight: bold;
@@ -35,11 +49,44 @@
       border-radius: 8px;
       background: rgba(0, 0, 0, 0.05);
     }
+    .light #lua {
+      color: #0077b6;
+      background: rgba(0, 119, 182, 0.1);
+    }
+    .dark #lua {
+      color: #00b4d8;
+      background: rgba(0, 180, 216, 0.2);
+    }
+    body.light {
+      background: #f0f8ff;
+      color: #000;
+    }
+    .light .praia {
+      background: #ffffff;
+      border: 1px solid #ccc;
+    }
+    .light #toggle {
+      background: #0077b6;
+      color: #fff;
+    }
+    body.dark {
+      background: #1e1e1e;
+      color: #f0f0f0;
+    }
+    .dark .praia {
+      background: #2c2c2c;
+      border: 1px solid #444;
+    }
+    .dark #toggle {
+      background: #00b4d8;
+      color: #000;
+    }
   </style>
 </head>
-<body>
+<body class="light">
   <div id="controls">
     <h1>🌊 Marés nas Praias de Portugal</h1>
+    <button id="toggle">Modo Escuro</button>
     <div id="lua">🌕 Lua Cheia (100%)</div>
   </div>
   <div id="map"></div>
@@ -66,9 +113,12 @@
     ];
 
     const map = L.map('map').setView([39.5, -8], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    let tileClaro = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
+    let tileEscuro = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; CartoDB'
+    });
 
     const ondaIcon = L.divIcon({
       html: '🌊',
@@ -121,12 +171,31 @@
         <p><strong>📏 Altura da maré:</strong> ${dadosMare.altura}</p>
         <p><a href="${link}" target="_blank">🔗 Ver detalhes da maré</a></p>
       `;
-      document.getElementById("praias").appendChild(div);
+            document.getElementById("praias").appendChild(div);
     });
 
+    // Alternância de modo claro/escuro
+    const toggleBtn = document.getElementById("toggle");
+    toggleBtn.addEventListener("click", () => {
+      const body = document.body;
+      const isLight = body.classList.contains("light");
+      if (isLight) {
+        body.classList.replace("light", "dark");
+        toggleBtn.textContent = "Modo Claro";
+        map.removeLayer(tileClaro);
+        tileEscuro.addTo(map);
+      } else {
+        body.classList.replace("dark", "light");
+        toggleBtn.textContent = "Modo Escuro";
+        map.removeLayer(tileEscuro);
+        tileClaro.addTo(map);
+      }
+    });
+
+    // Fase da Lua automática com emoji, nome e percentagem
     function calcularFaseLua() {
       const hoje = new Date();
-      const novaLua = new Date(Date.UTC(2000, 0, 6, 18, 14));
+      const novaLua = new Date(Date.UTC(2000, 0, 6, 18, 14)); // referência: Lua Nova
       const diff = hoje.getTime() - novaLua.getTime();
       const dias = diff / 1000 / 86400;
       const fase = (dias % 29.530588853);
