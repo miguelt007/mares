@@ -2,55 +2,129 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard de Marés</title>
+  <title>Marés em Oeiras</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #e0f7fa;
       padding: 20px;
+      background: #e0f7fa;
     }
     h1 {
       color: #00796b;
     }
-    .tide-info {
+    select {
+      padding: 8px;
+      font-size: 16px;
+    }
+    #tideData {
+      margin-top: 20px;
       background: #ffffff;
       padding: 15px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 600px;
-      margin: auto;
+    }
+    canvas {
+      margin-top: 30px;
+      max-width: 100%;
     }
   </style>
 </head>
 <body>
-  <h1>🌊 Marés em Almada</h1>
-  <div class="tide-info" id="tideData">
-    A carregar dados de marés...
+  <h1>🌊 Marés na Linha de Oeiras</h1>
+
+  <label for="praiaSelector">Escolhe a praia:</label>
+  <select id="praiaSelector">
+    <option value="38.6765,-9.3225">Praia da Torre</option>
+    <option value="38.6790,-9.3300">Praia de Santo Amaro</option>
+    <option value="38.6930,-9.3190">Praia de Carcavelos</option>
+  </select>
+
+  <div id="tideData">
+    <p>Os dados de marés vão aparecer aqui...</p>
   </div>
 
-  <script>
-    const latitude = 38.68;  // Almada
-    const longitude = -9.15;
-    const apiKey = 'bc935843-d537-441f-8524-c2cf2150f46d'; // Substituir com chave da API
+  <canvas id="tideChart" width="800" height="400"></canvas>
 
-    fetch(`https://www.worldtides.info/api/v2?heights&lat=${latitude}&lon=${longitude}&key=${apiKey}`)
-      .then(response => response.json())
-      .then(data => {
-        const tideDiv = document.getElementById('tideData');
-        if (data.heights) {
-          tideDiv.innerHTML = '<h2>Próximas Marés</h2><ul>' +
-            data.heights.slice(0, 6).map(tide => {
-              const date = new Date(tide.date);
-              return `<li>${date.toLocaleString('pt-PT')} — ${tide.height.toFixed(2)} m</li>`;
-            }).join('') + '</ul>';
-        } else {
-          tideDiv.innerHTML = 'Não foi possível obter dados de marés.';
+  <script>
+    const apiKey = "bc935843-d537-441f-8524-c2cf2150f46d"; // substitui pela tua chave da WorldTides
+    let tideChart;
+
+    async function fetchTideData(lat, lon) {
+      const today = new Date();
+      const startDate = today.toISOString().split('T')[0];
+      const endDate = new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+      const url = `https://www.worldtides.info/api/v3?extremes&height&start=${startDate}&length=72&lat=${lat}&lon=${lon}&key=${apiKey}`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      // Mostrar extremos
+      let html = `<h2>Dados de Marés</h2><p><strong>Localização:</strong> ${lat}, ${lon}</p>`;
+      if (data.extremes) {
+        data.extremes.forEach(tide => {
+          const hora = new Date(tide.date).toLocaleString();
+          html += `<p><strong>${tide.type === 'High' ? 'Maré Alta' : 'Maré Baixa'}:</strong> ${hora}</p>`;
+        });
+      } else {
+        html += `<p>Sem dados de extremos disponíveis.</p>`;
+      }
+      document.getElementById('tideData').innerHTML = html;
+
+      // Preparar dados para gráfico
+      if (data.heights) {
+        const labels = data.heights.map(h => new Date(h.date).toLocaleString());
+        const values = data.heights.map(h => h.height);
+
+        const chartData = {
+          labels: labels,
+          datasets: [{
+            label: 'Altura da Maré (m)',
+            data: values,
+            borderColor: '#00796b',
+            backgroundColor: 'rgba(0, 121, 107, 0.2)',
+            fill: true,
+            tension: 0.3
+          }]
+        };
+
+        const config = {
+          type: 'line',
+          data: chartData,
+          options: {
+            scales: {
+              x: {
+                ticks: {
+                  maxRotation: 90,
+                  minRotation: 45
+                }
+              },
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        };
+
+        if (tideChart) {
+          tideChart.destroy();
         }
-      })
-      .catch(error => {
-        document.getElementById('tideData').innerText = 'Erro ao carregar dados.';
-        console.error(error);
-      });
+        tideChart = new Chart(document.getElementById('tideChart'), config);
+      }
+    }
+
+    function updateTideData(lat, lon) {
+      fetchTideData(lat, lon);
+    }
+
+    document.getElementById('praiaSelector').addEventListener('change', function () {
+      const [lat, lon] = this.value.split(',');
+      updateTideData(lat, lon);
+    });
+
+    // Carrega dados iniciais da Praia da Torre
+    updateTideData(38.6765, -9.3225);
   </script>
 </body>
 </html>
