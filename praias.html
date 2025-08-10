@@ -2,153 +2,106 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Mapa de Praias com Filtros</title>
+  <title>Mapa de Praias com Previsão</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    body { margin: 0; font-family: Arial; }
     #map { height: 100vh; }
-    #filtros {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 1000;
-      background: rgba(255,255,255,0.95);
-      padding: 10px;
-      border-radius: 8px;
-    }
-    #filtros select {
-      margin: 4px;
-      padding: 6px;
-    }
+    .popup-content { font-size: 14px; }
+    .dados-box { margin-top: 10px; font-size: 13px; }
+    button { margin-top: 5px; padding: 5px; font-size: 13px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <div id="filtros">
-    <select id="regiaoSelect">
-      <option value="Todas">Todas as regiões</option>
-      <option value="Norte">Norte</option>
-      <option value="Centro">Centro</option>
-      <option value="Lisboa e Vale do Tejo">Lisboa e Vale do Tejo</option>
-      <option value="Alentejo">Alentejo</option>
-      <option value="Algarve">Algarve</option>
-      <option value="Madeira">Madeira</option>
-      <option value="Açores">Açores</option>
-    </select>
-    <select id="tipoSelect">
-      <option value="Todos">Todos os tipos</option>
-      <option value="Surf">Surf</option>
-      <option value="Urbana">Urbana</option>
-      <option value="Familiar">Familiar</option>
-      <option value="Naturista">Naturista</option>
-      <option value="Turística">Turística</option>
-      <option value="Isolada">Isolada</option>
-    </select>
-    <select id="bandeiraSelect">
-      <option value="Todas">Todas</option>
-      <option value="true">Bandeira Azul</option>
-      <option value="false">Sem Bandeira Azul</option>
-    </select>
-    <button onclick="filtrarPraias()">Filtrar</button>
-  </div>
-
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([39.5, -8], 7);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    const icons = {
-      Surf: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/861/861512.png', iconSize: [30, 30], iconAnchor: [15, 30] }),
-      Urbana: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/235/235861.png', iconSize: [30, 30], iconAnchor: [15, 30] }),
-      Familiar: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/3062/3062634.png', iconSize: [30, 30], iconAnchor: [15, 30] }),
-      Naturista: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/168/168882.png', iconSize: [30, 30], iconAnchor: [15, 30] }),
-      Turística: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/854/854894.png', iconSize: [30, 30], iconAnchor: [15, 30] }),
-      Isolada: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [30, 30], iconAnchor: [15, 30] })
-    };
+    const apiKey = '3cbe21f4-75eb-11f0-8df7-0242ac130006-3cbe2258-75eb-11f0-8df7-0242ac130006'; // 🔑 Insere aqui a tua chave da Stormglass
 
     const praias = [
       {
         nome: "Praia da Nazaré",
+        latitude: 39.602,
+        longitude: -9.070,
         municipio: "Nazaré",
         regiao: "Centro",
-        tipo: "Surf",
-        bandeiraAzul: true,
-        latitude: 39.602,
-        longitude: -9.070
+        tipo: "Oceânica",
+        bandeiraAzul: true
       },
       {
-        nome: "Praia do Guincho",
+        nome: "Praia de Carcavelos",
+        latitude: 38.676,
+        longitude: -9.325,
         municipio: "Cascais",
-        regiao: "Lisboa e Vale do Tejo",
-        tipo: "Naturista",
-        bandeiraAzul: false,
-        latitude: 38.732,
-        longitude: -9.472
-      },
-      {
-        nome: "Praia da Rocha",
-        municipio: "Portimão",
-        regiao: "Algarve",
-        tipo: "Turística",
-        bandeiraAzul: true,
-        latitude: 37.118,
-        longitude: -8.538
-      },
-      {
-        nome: "Praia de São Pedro de Moel",
-        municipio: "Marinha Grande",
-        regiao: "Centro",
-        tipo: "Familiar",
-        bandeiraAzul: true,
-        latitude: 39.767,
-        longitude: -9.026
-      },
-      {
-        nome: "Praia do Porto Santo",
-        municipio: "Porto Santo",
-        regiao: "Madeira",
-        tipo: "Isolada",
-        bandeiraAzul: true,
-        latitude: 33.059,
-        longitude: -16.333
+        regiao: "Lisboa",
+        tipo: "Oceânica",
+        bandeiraAzul: true
       }
     ];
 
-    const marcadores = [];
+    const map = L.map('map').setView([39.5, -8.5], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
-    function mostrarPraias(lista) {
-      marcadores.forEach(m => map.removeLayer(m));
-      marcadores.length = 0;
-
-      lista.forEach(praia => {
-        const icon = icons[praia.tipo] || icons.Urbana;
-        const marker = L.marker([praia.latitude, praia.longitude], { icon }).addTo(map);
-        marker.bindPopup(`<strong>${praia.nome}</strong><br>${praia.municipio}, ${praia.regiao}<br>Tipo: ${praia.tipo}<br>Bandeira Azul: ${praia.bandeiraAzul ? '✅' : '❌'}`);
-        marcadores.push(marker);
+    function mostrarPraias() {
+      praias.forEach(praia => {
+        const marker = L.marker([praia.latitude, praia.longitude]).addTo(map);
+        marker.bindPopup(`
+          <div class="popup-content" id="popup-${praia.nome.replace(/\s+/g, '')}">
+            <strong>${praia.nome}</strong><br>
+            ${praia.municipio}, ${praia.regiao}<br>
+            Tipo: ${praia.tipo}<br>
+            Bandeira Azul: ${praia.bandeiraAzul ? '✅' : '❌'}<br>
+            <button onclick="verPrevisao(${praia.latitude}, ${praia.longitude}, '${praia.nome}')">Ver Previsão</button>
+          </div>
+        `);
       });
     }
 
-    function filtrarPraias() {
-      const regiao = document.getElementById('regiaoSelect').value;
-      const tipo = document.getElementById('tipoSelect').value;
-      const bandeira = document.getElementById('bandeiraSelect').value;
+    async function verPrevisao(lat, lng, nome) {
+      const params = 'waveHeight,airTemperature,waterTemperature,windSpeed';
+      const now = new Date();
+      const end = new Date();
+      end.setDate(now.getDate() + 3);
 
-      const filtradas = praias.filter(p => {
-        const r = regiao === 'Todas' || p.regiao === regiao;
-        const t = tipo === 'Todos' || p.tipo === tipo;
-        const b = bandeira === 'Todas' ||
-                  (bandeira === 'true' && p.bandeiraAzul === true) ||
-                  (bandeira === 'false' && p.bandeiraAzul === false);
-        return r && t && b;
-      });
+      const url = `https://api.stormglass.io/v2/weather/point?lat=${lat}&lng=${lng}&params=${params}&start=${now.toISOString()}&end=${end.toISOString()}`;
 
-      mostrarPraias(filtradas);
+      try {
+        const response = await fetch(url, {
+          headers: { Authorization: apiKey }
+        });
+        const data = await response.json();
+
+        let html = `<div class="dados-box"><strong>🌤️ Previsão 3 dias</strong><br>`;
+        const dias = {};
+
+        data.hours.forEach(hour => {
+          const dia = new Date(hour.time).toLocaleDateString();
+          if (!dias[dia]) dias[dia] = hour;
+        });
+
+        Object.entries(dias).forEach(([dia, info]) => {
+          html += `
+            <hr><strong>📅 ${dia}</strong><br>
+            🌊 Ondas: ${info.waveHeight?.noaa ?? 'N/D'} m<br>
+            💨 Vento: ${info.windSpeed?.noaa ?? 'N/D'} m/s<br>
+            🌡️ Ar: ${info.airTemperature?.noaa ?? 'N/D'} °C<br>
+            🌊 Água: ${info.waterTemperature?.noaa ?? 'N/D'} °C<br>
+          `;
+        });
+
+        html += `</div>`;
+        const popupId = `popup-${nome.replace(/\s+/g, '')}`;
+        const popupElement = document.getElementById(popupId);
+        if (popupElement) popupElement.innerHTML += html;
+      } catch (err) {
+        alert('Erro ao obter dados marítimos.');
+        console.error(err);
+      }
     }
 
-    mostrarPraias(praias);
+    mostrarPraias();
   </script>
 </body>
 </html>
