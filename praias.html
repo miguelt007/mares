@@ -34,6 +34,11 @@
     .praia a:hover {
       text-decoration: underline;
     }
+    .emoji-icon {
+      font-size: 28px;
+      text-align: center;
+      line-height: 32px;
+    }
   </style>
 </head>
 <body>
@@ -67,9 +72,10 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // 🌊 Emoji como ícone
-    const ondaIcon = L.icon({
-      iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Emoji_u1f30a.svg',
+    // 🌊 Emoji como marcador via DivIcon
+    const ondaIcon = L.divIcon({
+      html: '🌊',
+      className: 'emoji-icon',
       iconSize: [32, 32],
       iconAnchor: [16, 32],
       popupAnchor: [0, -32]
