@@ -2,137 +2,39 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Marés em Oeiras</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Dashboard Meteorológico - Carcavelos</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #e0f7fa;
-    }
-    h1 {
-      color: #00796b;
-    }
-    select {
-      padding: 8px;
-      font-size: 16px;
-    }
-    #tideData {
-      margin-top: 20px;
-      background: #ffffff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    canvas {
-      margin-top: 30px;
-      max-width: 100%;
-    }
+    body { font-family: Arial, sans-serif; background: #f0f8ff; padding: 20px; }
+    h1 { color: #005f73; }
+    .card { background: #fff; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
-  <h1>🌊 Marés na Linha de Oeiras</h1>
-
-  <label for="praiaSelector">Escolhe a praia:</label>
-  <select id="praiaSelector">
-    <option value="38.6765,-9.3225,Praia da Torre">Praia da Torre</option>
-    <option value="38.6790,-9.3300,Praia de Santo Amaro">Praia de Santo Amaro</option>
-    <option value="38.6930,-9.3190,Praia de Carcavelos">Praia de Carcavelos</option>
-  </select>
-
-  <div id="tideData">
-    <p>Os dados de marés vão aparecer aqui...</p>
-  </div>
-
-  <canvas id="tideChart" width="800" height="400"></canvas>
+  <h1>🌤️ Tempo em Carcavelos Hoje</h1>
+  <div id="weather"></div>
 
   <script>
-    const apiKey = "bc935843-d537-441f-8524-c2cf2150f46d"; // substitui pela tua chave da WorldTides
-    let tideChart;
+    const apiKey = 'TUA_API_KEY_AQUI'; // Substitui pela tua chave
+    const station = '08536'; // Estação meteorológica próxima de Carcavelos
 
-    // Estações conhecidas
-    const stations = {
-      "Praia da Torre": { lat: 38.6833, lon: -9.3000, name: "Paço de Arcos" },
-      "Praia de Santo Amaro": { lat: 38.6833, lon: -9.3000, name: "Paço de Arcos" },
-      "Praia de Carcavelos": { lat: 38.7000, lon: -9.4167, name: "Cascais" }
-    };
-
-    async function fetchTideData(stationLat, stationLon, praiaNome, stationNome) {
-      const today = new Date();
-      const startDate = today.toISOString().split('T')[0];
-      const url = `https://www.worldtides.info/api/v3?extremes&height&start=${startDate}&length=72&lat=${stationLat}&lon=${stationLon}&key=${apiKey}`;
-
-      const response = await fetch(url);
+    async function getWeather() {
+      const today = new Date().toISOString().split('T')[0];
+      const url = `https://api.meteostat.net/v2/point/daily?lat=38.676&lon=-9.325&start=${today}&end=${today}`;
+      
+      const response = await fetch(url, {
+        headers: { 'x-api-key': apiKey }
+      });
       const data = await response.json();
+      const weather = data.data[0];
 
-      let html = `<h2>${praiaNome}</h2>`;
-      html += `<p><strong>Dados fornecidos pela estação:</strong> ${stationNome}</p>`;
-
-      if (data.extremes) {
-        data.extremes.forEach(tide => {
-          const hora = new Date(tide.date).toLocaleString();
-          html += `<p><strong>${tide.type === 'High' ? 'Maré Alta' : 'Maré Baixa'}:</strong> ${hora}</p>`;
-        });
-      } else {
-        html += `<p>Sem dados de extremos disponíveis.</p>`;
-      }
-
-      document.getElementById('tideData').innerHTML = html;
-
-      // Gráfico
-      if (data.heights) {
-        const labels = data.heights.map(h => new Date(h.date).toLocaleString());
-        const values = data.heights.map(h => h.height);
-
-        const chartData = {
-          labels: labels,
-          datasets: [{
-            label: 'Altura da Maré (m)',
-            data: values,
-            borderColor: '#00796b',
-            backgroundColor: 'rgba(0, 121, 107, 0.2)',
-            fill: true,
-            tension: 0.3
-          }]
-        };
-
-        const config = {
-          type: 'line',
-          data: chartData,
-          options: {
-            scales: {
-              x: {
-                ticks: {
-                  maxRotation: 90,
-                  minRotation: 45
-                }
-              },
-              y: {
-                beginAtZero: true
-              }
-            }
-          }
-        };
-
-        if (tideChart) {
-          tideChart.destroy();
-        }
-        tideChart = new Chart(document.getElementById('tideChart'), config);
-      }
+      document.getElementById('weather').innerHTML = `
+        <div class="card">🌡️ <strong>Temperatura média:</strong> ${weather.tavg}°C</div>
+        <div class="card">💨 <strong>Vento médio:</strong> ${weather.wspd} km/h</div>
+        <div class="card">🌫️ <strong>Pressão:</strong> ${weather.pres} hPa</div>
+      `;
     }
 
-    function updateTideData(lat, lon, praiaNome) {
-      const station = stations[praiaNome];
-      fetchTideData(station.lat, station.lon, praiaNome, station.name);
-    }
-
-    document.getElementById('praiaSelector').addEventListener('change', function () {
-      const [lat, lon, praiaNome] = this.value.split(',');
-      updateTideData(lat, lon, praiaNome);
-    });
-
-    // Carrega dados iniciais da Praia da Torre
-    updateTideData(38.6765, -9.3225, "Praia da Torre");
+    getWeather();
   </script>
 </body>
 </html>
