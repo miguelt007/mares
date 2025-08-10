@@ -10,24 +10,48 @@
       padding: 20px;
       transition: background 0.3s, color 0.3s;
     }
+
     #map {
       height: 500px;
       margin-bottom: 30px;
       border: 2px solid #ccc;
       border-radius: 8px;
     }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
     .praia {
       border-radius: 8px;
       padding: 15px;
-      margin-bottom: 15px;
+      min-height: 220px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       transition: background 0.3s, color 0.3s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
+
+    .praia h2 {
+      font-size: 1.6em;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #0077b6;
+    }
+
+    .praia p {
+      margin: 6px 0;
+    }
+
     .emoji-icon {
       font-size: 28px;
       text-align: center;
       line-height: 32px;
     }
+
     #controls {
       display: flex;
       align-items: center;
@@ -35,6 +59,7 @@
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
+
     #toggle {
       padding: 8px 16px;
       font-size: 16px;
@@ -42,6 +67,7 @@
       border-radius: 6px;
       cursor: pointer;
     }
+
     #lua {
       font-size: 20px;
       font-weight: bold;
@@ -49,37 +75,49 @@
       border-radius: 8px;
       background: rgba(0, 0, 0, 0.05);
     }
+
     .light #lua {
       color: #0077b6;
       background: rgba(0, 119, 182, 0.1);
     }
+
     .dark #lua {
       color: #00b4d8;
       background: rgba(0, 180, 216, 0.2);
     }
+
     body.light {
       background: #f0f8ff;
       color: #000;
     }
+
     .light .praia {
       background: #ffffff;
       border: 1px solid #ccc;
     }
+
     .light #toggle {
       background: #0077b6;
       color: #fff;
     }
+
     body.dark {
       background: #1e1e1e;
       color: #f0f0f0;
     }
+
     .dark .praia {
       background: #2c2c2c;
       border: 1px solid #444;
     }
+
     .dark #toggle {
       background: #00b4d8;
       color: #000;
+    }
+
+    .dark .praia h2 {
+      color: #00b4d8;
     }
   </style>
 </head>
@@ -89,8 +127,9 @@
     <button id="toggle">Modo Escuro</button>
     <div id="lua">🌕 Lua Cheia (100%)</div>
   </div>
+
   <div id="map"></div>
-  <div id="praias"></div>
+  <div class="grid" id="praias"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
@@ -165,14 +204,14 @@
                             <a href="${link}" target="_blank">Ver maré</a>`);
         marcadores[nomeFormatado] = marcador;
 
-        const div = document.createElement("div");
+                const div = document.createElement("div");
         div.className = "praia";
         div.innerHTML = `
           <h2>${local.nome}</h2>
           <p><strong>📍 Coordenadas:</strong> ${local.lat}, ${local.lon}</p>
           <p id="mare-${nomeFormatado}">
             <strong>🌊 Preia-mar:</strong> ${dadosMare.preia} &nbsp; | &nbsp;
-                        <strong>Baixa-mar:</strong> ${dadosMare.baixa}<br>
+            <strong>Baixa-mar:</strong> ${dadosMare.baixa}<br>
             <strong>📏 Altura da maré:</strong> ${dadosMare.altura}<br>
             <em>🕒 Atualizado às ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</em>
           </p>
