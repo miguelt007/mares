@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapa de Praias com Previsão Marítima</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body { margin: 0; font-family: Arial; }
+    #map { height: 100vh; }
+    #filtros {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      background: rgba(255,255,255,0.9);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    #filtros button {
+      margin: 4px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    .popup-content { font-size: 14px; }
+    .dados-box { font-size: 13px; margin-top: 8px; background: #eef; padding: 8px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div id="filtros">
+    <button onclick="filtrar('Todas')">Todas</button>
+    <button onclick="filtrar('Cascais')">Cascais</button>
+    <button onclick="filtrar('Almada')">Almada</button>
+    <button onclick="filtrar('Oeiras')">Oeiras</button>
+    <button onclick="filtrar('Bandeira Azul')">Bandeira Azul</button>
+  </div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const apiKey = 'TUA_API_KEY_AQUI'; // Substitui pela tua chave Stormglass
+
+    const praias = [
+      { nome: "Praia da Ponta dos Corvos", lat: 38.6500, lng: -9.1000, regiao: "Almada", bandeiraAzul: false, tipo: "isolada" },
+      { nome: "Praia de Carcavelos", lat: 38.6830, lng: -9.3190, regiao: "Cascais", bandeiraAzul: true, tipo: "surf" },
+      { nome: "Praia da Cruz Quebrada", lat: 38.7012, lng: -9.2425, regiao: "Oeiras", bandeiraAzul: true, tipo: "familiar" },
+      { nome: "Praia de São João", lat: 38.6333, lng: -9.2333, regiao: "Almada", bandeiraAzul: true, tipo: "familiar" },
+      { nome: "Praia do Guincho", lat: 38.7286, lng: -9.4722, regiao: "Cascais", bandeiraAzul: true, tipo: "surf" },
+      { nome: "Praia de Paço de Arcos", lat: 38.6950, lng: -9.3000, regiao: "Oeiras", bandeiraAzul: false, tipo: "isolada" },
+      { nome: "Praia de Caxias", lat: 38.6883, lng: -9.2961, regiao: "Oeiras", bandeiraAzul: false, tipo: "familiar" },
+      { nome: "Praia da Riviera", lat: 38.6200, lng: -9.2300, regiao: "Almada", bandeiraAzul: true, tipo: "surf" }
+    ];
+
+    const map = L.map('map').setView([38.7, -9.3], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const icons = {
+      surf: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/861/861512.png', iconSize: [30, 30], iconAnchor: [15, 30] }),
+      familiar: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/3062/3062634.png', iconSize: [30, 30], iconAnchor: [15, 30] }),
+      isolada: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [30, 30], iconAnchor: [15, 30] })
+    };
+
+    const marcadores = [];
+
+    praias.forEach(praia => {
+      const marker = L.marker([praia.lat, praia.lng], { icon: icons[praia.tipo] }).addTo(map);
+      marker.bindPopup(`<div class="popup-content" id="popup-${praia.nome.replace(/\s+/g, '')}">
+        <strong>${praia.nome}</strong><br>
+        <em>${praia.regiao} ${praia.bandeiraAzul ? '🏳️ Bandeira Azul' : ''}</em><br>
+        <button onclick="verDados(${praia.lat}, ${praia.lng}, '${praia.nome}')">Ver Previsão</button>
+      </div>`);
+      marcadores.push({ marker, praia });
+    });
+
+    async function verDados(lat, lng, nome) {
+      const params = 'waveHeight,airTemperature,waterTemperature,windSpeed';
+      const now = new Date();
+      const end = new Date();
+      end.setDate(now.getDate() + 3);
+
+      const url = `https://api.stormglass.io/v2/weather/point?lat=${lat}&lng=${lng}&params=${params}&start=${now.toISOString()}&end=${end.toISOString()}`;
+
+      try {
+        const response = await fetch(url, {
+          headers: { Authorization: apiKey }
+        });
+        const data = await response.json();
+
+        let html = `<div class="dados-box"><strong>🌤️ Previsão 3 dias</strong><br>`;
+        const dias = {};
+
+        data.hours.forEach(hour => {
+          const dia = new Date(hour.time).toLocaleDateString();
+          if (!dias[dia]) dias[dia] = hour;
+        });
+
+        Object.entries(dias).forEach(([dia, info]) => {
+          html += `
+            <hr><strong>📅 ${dia}</strong><br>
+            🌊 Ondas: ${info.waveHeight?.noaa ?? 'N/D'} m<br>
+            💨 Vento: ${info.windSpeed?.noaa ?? 'N/D'} m/s<br>
+            🌡️ Ar: ${info.airTemperature?.noaa ?? 'N/D'} °C<br>
+            🌊 Água: ${info.waterTemperature?.noaa ?? 'N/D'} °C<br>
+          `;
+        });
+
+        html += `</div>`;
+        const popupId = `popup-${nome.replace(/\s+/g, '')}`;
+        const popupElement = document.getElementById(popupId);
+        if (popupElement) popupElement.innerHTML += html;
+      } catch (err) {
+        alert('Erro ao obter dados marítimos.');
+        console.error(err);
+      }
+    }
+
+    function filtrar(criterio) {
+      marcadores.forEach(({ marker, praia }) => {
+        const mostrar =
+          criterio === 'Todas' ||
+          praia.regiao === criterio ||
+          (criterio === 'Bandeira Azul' && praia.bandeiraAzul);
+        if (mostrar) {
+          marker.addTo(map);
+        } else {
+          map.removeLayer(marker);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
