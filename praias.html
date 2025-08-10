@@ -83,7 +83,23 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const locais = [/* ... lista de praias como antes ... */];
+    const locais = [
+      { nome: "Lisboa", distrito: "lisboa", lat: 38.7169, lon: -9.1399, preia: "02:02", baixa: "07:09", altura: "2.72m" },
+      { nome: "Cascais", distrito: "lisboa", lat: 38.6979, lon: -9.4204, preia: "02:10", baixa: "07:18", altura: "2.65m" },
+      { nome: "Costa da Caparica", distrito: "setubal", lat: 38.6333, lon: -9.2333, preia: "02:05", baixa: "07:12", altura: "2.70m" },
+      { nome: "Setúbal", distrito: "setubal", lat: 38.5244, lon: -8.8926, preia: "02:15", baixa: "07:25", altura: "2.60m" },
+      { nome: "Sines", distrito: "setubal", lat: 37.9561, lon: -8.8691, preia: "02:20", baixa: "07:30", altura: "2.55m" },
+      { nome: "Peniche", distrito: "leiria", lat: 39.3558, lon: -9.3811, preia: "01:58", baixa: "07:05", altura: "2.75m" },
+      { nome: "Ericeira", distrito: "lisboa", lat: 38.9667, lon: -9.4167, preia: "02:00", baixa: "07:08", altura: "2.73m" },
+      { nome: "Figueira da Foz", distrito: "coimbra", lat: 40.1500, lon: -8.8667, preia: "01:50", baixa: "07:00", altura: "2.80m" },
+      { nome: "Aveiro", distrito: "aveiro", lat: 40.6405, lon: -8.6538, preia: "01:45", baixa: "06:55", altura: "2.85m" },
+      { nome: "Porto", distrito: "porto", lat: 41.1496, lon: -8.6109, preia: "01:40", baixa: "06:50", altura: "2.90m" },
+      { nome: "Viana do Castelo", distrito: "viana-do-castelo", lat: 41.6935, lon: -8.8329, preia: "01:35", baixa: "06:45", altura: "2.92m" },
+      { nome: "Portimão", distrito: "faro", lat: 37.1333, lon: -8.5333, preia: "02:25", baixa: "07:35", altura: "2.50m" },
+      { nome: "Tavira", distrito: "faro", lat: 37.1259, lon: -7.6455, preia: "02:30", baixa: "07:40", altura: "2.45m" },
+      { nome: "Ponta Delgada", distrito: "acores", lat: 37.7412, lon: -25.6756, preia: "03:00", baixa: "08:00", altura: "2.20m" },
+      { nome: "Funchal", distrito: "madeira", lat: 32.6669, lon: -16.9241, preia: "03:10", baixa: "08:10", altura: "2.10m" }
+    ];
 
     const map = L.map('map').setView([39.5, -8], 6);
     let tileClaro = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -122,7 +138,7 @@
       document.getElementById("praias").appendChild(div);
     });
 
-    // Alternância de modo
+        // Alternância de modo
     const toggleBtn = document.getElementById("toggle");
     toggleBtn.addEventListener("click", () => {
       const body = document.body;
@@ -142,7 +158,11 @@
 
     // Fase da Lua automática
     function calcularFaseLua() {
-      const fases = ["🌑 Nova", "🌒 Crescente", "🌓 Quarto Crescente", "🌔 Gibosa Crescente", "🌕 Cheia", "🌖 Gibosa Minguante", "🌗 Quarto Minguante", "🌘 Minguante"];
+      const fases = [
+        "🌑 Nova", "🌒 Crescente", "🌓 Quarto Crescente",
+        "🌔 Gibosa Crescente", "🌕 Cheia", "🌖 Gibosa Minguante",
+        "🌗 Quarto Minguante", "🌘 Minguante"
+      ];
       const hoje = new Date();
       let ano = hoje.getFullYear(), mes = hoje.getMonth() + 1, dia = hoje.getDate();
       if (mes < 3) { ano--; mes += 12; }
