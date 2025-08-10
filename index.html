@@ -2,63 +2,71 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Dados Marítimos</title>
+  <title>Mapa de Praias de Portugal</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    body { font-family: Arial; padding: 20px; background: #e0f7fa; }
-    select, button { padding: 8px; margin: 10px 0; }
-    #dados { margin-top: 20px; }
+    body { margin: 0; font-family: Arial; }
+    #map { height: 100vh; }
+    .popup-content { font-size: 14px; }
+    .dados-box { padding: 10px; background: #eef; margin-top: 10px; }
   </style>
 </head>
 <body>
-  <h1>🌊 Condições Marítimas</h1>
+  <div id="map"></div>
+  <div id="dados" class="dados-box"></div>
 
-  <label for="local">Escolhe uma praia:</label>
-  <select id="local">
-    <option value="39.6022,-9.0726">Peniche</option>
-    <option value="38.6577,-9.1946">Costa da Caparica</option>
-    <option value="39.6028,-9.0700">Nazaré</option>
-    <option value="37.0179,-7.9333">Praia da Rocha</option>
-    <option value="38.5244,-8.8926">Comporta</option>
-    <option value="41.1832,-8.6885">Matosinhos</option>
-    <option value="38.7000,-9.4167">Praia Grande</option>
-    <option value="39.5500,-8.9833">São Martinho do Porto</option>
-  </select>
-  <button onclick="buscarDados()">Ver condições</button>
-
-  <div id="dados"></div>
-
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    async function buscarDados() {
-      const coords = document.getElementById("local").value;
-      const [lat, lon] = coords.split(",");
-      const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,water_temperature,wind_speed,wind_direction&timezone=auto`;
+    const praias = [
+      { nome: "Peniche", lat: 39.3558, lng: -9.3811 },
+      { nome: "Carcavelos", lat: 38.6766, lng: -9.3250 },
+      { nome: "Cruz Quebrada", lat: 38.7012, lng: -9.2425 },
+      { nome: "São João da Caparica", lat: 38.6333, lng: -9.2333 },
+      { nome: "Guincho", lat: 38.7286, lng: -9.4722 },
+      { nome: "Praia da Rocha", lat: 37.1019, lng: -8.6741 },
+      { nome: "Figueira da Foz", lat: 40.1500, lng: -8.8667 },
+      { nome: "Moledo", lat: 41.8000, lng: -8.8667 }
+    ];
+
+    const map = L.map('map').setView([39.5, -8.5], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    praias.forEach(praia => {
+      const marker = L.marker([praia.lat, praia.lng]).addTo(map);
+      marker.bindPopup(`
+        <div class="popup-content">
+          <strong>${praia.nome}</strong><br>
+          <button onclick="verDados(${praia.lat}, ${praia.lng}, '${praia.nome}')">Ver Dados</button>
+        </div>
+      `);
+    });
+
+    async function verDados(lat, lng, nome) {
+      const params = 'waveHeight,airTemperature,waterTemperature,windSpeed';
+      const apiKey = 'TUA_API_KEY_AQUI'; // Substitui pela tua chave Stormglass
+      const url = `https://api.stormglass.io/v2/weather/point?lat=${lat}&lng=${lng}&params=${params}`;
 
       try {
-        const res = await fetch(url);
-        const data = await res.json();
+        const response = await fetch(url, {
+          headers: { Authorization: apiKey }
+        });
+        const data = await response.json();
+        const info = data.hours[0];
+        const hora = new Date(info.time).toLocaleString();
 
-        // Verifica se há dados
-        if (!data.hourly || !data.hourly.wave_height || data.hourly.wave_height.length === 0) {
-          document.getElementById("dados").innerHTML = `<p>⚠️ Sem dados disponíveis para esta localização.</p>`;
-          return;
-        }
-
-        const info = {
-          ondas: data.hourly.wave_height[0],
-          tempAgua: data.hourly.water_temperature[0],
-          vento: data.hourly.wind_speed[0],
-          direcaoVento: data.hourly.wind_direction[0],
-          hora: data.hourly.time[0]
-        };
-
-        document.getElementById("dados").innerHTML = `
-          <h2>📅 Dados para ${info.hora}</h2>
-          <p><strong>Altura das ondas:</strong> ${info.ondas} m</p>
-          <p><strong>Temperatura da água:</strong> ${info.tempAgua} °C</p>
-          <p><strong>Vento:</strong> ${info.vento} km/h (${info.direcaoVento}°)</p>
+        document.getElementById('dados').innerHTML = `
+          <h3>🌊 Dados Marítimos - ${nome}</h3>
+          <strong>📅 Hora:</strong> ${hora}<br>
+          🌊 <strong>Altura das ondas:</strong> ${info.waveHeight?.noaa ?? 'N/D'} m<br>
+          💨 <strong>Vento:</strong> ${info.windSpeed?.noaa ?? 'N/D'} m/s<br>
+          🌡️ <strong>Temperatura do ar:</strong> ${info.airTemperature?.noaa ?? 'N/D'} °C<br>
+          🌊 <strong>Temperatura da água:</strong> ${info.waterTemperature?.noaa ?? 'N/D'} °C
         `;
-      } catch (error) {
-        document.getElementById("dados").innerHTML = `<p>❌ Erro ao obter dados. Tenta novamente mais tarde.</p>`;
+      } catch (err) {
+        document.getElementById('dados').innerText = 'Erro ao obter dados.';
+        console.error(err);
       }
     }
   </script>
