@@ -69,7 +69,54 @@
       Isolada: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [30, 30], iconAnchor: [15, 30] })
     };
 
-    const praias = [/* insere aqui o JSON das praias */];
+    const praias = [
+      {
+        nome: "Praia da Nazaré",
+        municipio: "Nazaré",
+        regiao: "Centro",
+        tipo: "Surf",
+        bandeiraAzul: true,
+        latitude: 39.602,
+        longitude: -9.070
+      },
+      {
+        nome: "Praia do Guincho",
+        municipio: "Cascais",
+        regiao: "Lisboa e Vale do Tejo",
+        tipo: "Naturista",
+        bandeiraAzul: false,
+        latitude: 38.732,
+        longitude: -9.472
+      },
+      {
+        nome: "Praia da Rocha",
+        municipio: "Portimão",
+        regiao: "Algarve",
+        tipo: "Turística",
+        bandeiraAzul: true,
+        latitude: 37.118,
+        longitude: -8.538
+      },
+      {
+        nome: "Praia de São Pedro de Moel",
+        municipio: "Marinha Grande",
+        regiao: "Centro",
+        tipo: "Familiar",
+        bandeiraAzul: true,
+        latitude: 39.767,
+        longitude: -9.026
+      },
+      {
+        nome: "Praia do Porto Santo",
+        municipio: "Porto Santo",
+        regiao: "Madeira",
+        tipo: "Isolada",
+        bandeiraAzul: true,
+        latitude: 33.059,
+        longitude: -16.333
+      }
+    ];
+
     const marcadores = [];
 
     function mostrarPraias(lista) {
