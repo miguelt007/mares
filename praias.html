@@ -21,14 +21,14 @@
     }).addTo(map);
 
     const marAltaIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2933/2933825.png',
       iconSize: [32, 32],
       iconAnchor: [16, 32],
       popupAnchor: [0, -32]
     });
 
     const marBaixaIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2933/2933825.png',
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2933/2933826.png',
       iconSize: [32, 32],
       iconAnchor: [16, 32],
       popupAnchor: [0, -32]
@@ -41,6 +41,24 @@
 
     const agora = new Date();
     const horaAtualMin = agora.getHours() * 60 + agora.getMinutes();
+
+    const linksLocais = {
+      "Lisboa": "https://tabuademares.com/pt/lisboa",
+      "Cascais": "https://tabuademares.com/pt/cascais",
+      "Costa da Caparica": "https://tabuademares.com/pt/costa-da-caparica",
+      "Setúbal": "https://tabuademares.com/pt/setubal",
+      "Sines": "https://tabuademares.com/pt/sines",
+      "Peniche": "https://tabuademares.com/pt/peniche",
+      "Ericeira": "https://tabuademares.com/pt/ericeira",
+      "Figueira da Foz": "https://tabuademares.com/pt/figueira-da-foz",
+      "Aveiro": "https://tabuademares.com/pt/aveiro",
+      "Porto": "https://tabuademares.com/pt/porto",
+      "Viana do Castelo": "https://tabuademares.com/pt/viana-do-castelo",
+      "Portimão": "https://tabuademares.com/pt/portimao",
+      "Tavira": "https://tabuademares.com/pt/tavira",
+      "Ponta Delgada": "https://tabuademares.com/pt/ponta-delgada",
+      "Funchal": "https://tabuademares.com/pt/funchal"
+    };
 
     const locais = [
       { nome: "Lisboa", lat: 38.7169, lon: -9.1399, preia: "02:02", baixa: "07:09", altura: "2.72m" },
@@ -69,6 +87,7 @@
 
       const estaEm = diffPreia < diffBaixa ? "Maré Alta" : "Maré Baixa";
       const iconEscolhido = diffPreia < diffBaixa ? marAltaIcon : marBaixaIcon;
+      const link = linksLocais[local.nome] || "#";
 
       const popupContent = `
         <strong>${local.nome}</strong><br>
@@ -76,7 +95,7 @@
         Preia-mar: ${local.preia}<br>
         Baixa-mar: ${local.baixa}<br>
         Altura atual: ${local.altura}<br>
-        <a href="https://tabuademares.com/pt/${local.nome.toLowerCase().replace(/ /g, '-')}" target="_blank">Ver mais</a>
+        <a href="${link}" target="_blank">Ver mais</a>
       `;
       L.marker([local.lat, local.lon], { icon: iconEscolhido }).addTo(map)
         .bindPopup(popupContent);
