@@ -1,208 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
-  <title>Mapa de Praias</title>
+  <meta charset="UTF-8">
+  <title>Mapa de Praias com Filtros</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+    body { margin: 0; font-family: Arial; }
+    #map { height: 100vh; }
+    #filtros {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      background: rgba(255,255,255,0.95);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    #filtros select {
+      margin: 4px;
+      padding: 6px;
+    }
+  </style>
 </head>
 <body>
-  <div id="map" style="height: 600px;"></div>
-  <script>
-    const map = L.map('map').setView([38.7169, -9.1399], 6); // Centro de Portugal
+  <div id="filtros">
+    <select id="regiaoSelect">
+      <option value="Todas">Todas as regiões</option>
+      <option value="Norte">Norte</option>
+      <option value="Centro">Centro</option>
+      <option value="Lisboa e Vale do Tejo">Lisboa e Vale do Tejo</option>
+      <option value="Alentejo">Alentejo</option>
+      <option value="Algarve">Algarve</option>
+      <option value="Madeira">Madeira</option>
+      <option value="Açores">Açores</option>
+    </select>
+    <select id="tipoSelect">
+      <option value="Todos">Todos os tipos</option>
+      <option value="Surf">Surf</option>
+      <option value="Urbana">Urbana</option>
+      <option value="Familiar">Familiar</option>
+      <option value="Naturista">Naturista</option>
+      <option value="Turística">Turística</option>
+      <option value="Isolada">Isolada</option>
+    </select>
+    <select id="bandeiraSelect">
+      <option value="Todas">Todas</option>
+      <option value="true">Bandeira Azul</option>
+      <option value="false">Sem Bandeira Azul</option>
+    </select>
+    <button onclick="filtrarPraias()">Filtrar</button>
+  </div>
 
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([39.5, -8], 7);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    const praias = [
-  {
-  
-    "nome": "Praia de Carcavelos",
-    "latitude": 38.6830,
-    "longitude": -9.3190,
-    "regiao": "Lisboa e Vale do Tejo",
-    "municipio": "Cascais",
-    "bandeiraAzul": true,
-    "tipo": "Surf"
-  },
-  {
-    "nome": "Praia da Fonte da Telha",
-    "latitude": 38.5650,
-    "longitude": -9.1830,
-    "regiao": "Lisboa e Vale do Tejo",
-    "municipio": "Almada",
-    "bandeiraAzul": true,
-    "tipo": "Urbana"
-  },
-  {
-    "nome": "Praia da Rocha",
-    "latitude": 37.1200,
-    "longitude": -8.5380,
-    "regiao": "Algarve",
-    "municipio": "Portimão",
-    "bandeiraAzul": true,
-    "tipo": "Turística"
-  },
-  {
-    "nome": "Praia do Norte",
-    "latitude": 39.6100,
-    "longitude": -9.0700,
-    "regiao": "Centro",
-    "municipio": "Nazaré",
-    "bandeiraAzul": false,
-    "tipo": "Surf"
-  },
-  {
-    "nome": "Praia da Ribeira Quente",
-    "latitude": 37.7330,
-    "longitude": -25.3170,
-    "regiao": "Açores",
-    "municipio": "Povoação",
-    "bandeiraAzul": true,
-    "tipo": "Isolada"
-  },
-  {
-    "nome": "Praia do Amado",
-    "latitude": 37.1830,
-    "longitude": -8.9000,
-    "regiao": "Algarve",
-    "municipio": "Aljezur",
-    "bandeiraAzul": true,
-    "tipo": "Surf"
-  },
-  {
-    "nome": "Praia de São Pedro de Moel",
-    "latitude": 39.7670,
-    "longitude": -9.0300,
-    "regiao": "Centro",
-    "municipio": "Marinha Grande",
-    "bandeiraAzul": true,
-    "tipo": "Urbana"
-  },
-  {
-    "nome": "Praia do Guincho",
-    "latitude": 38.7320,
-    "longitude": -9.4720,
-    "regiao": "Lisboa e Vale do Tejo",
-    "municipio": "Cascais",
-    "bandeiraAzul": true,
-    "tipo": "Surf"
-  },
-  {
-    "nome": "Praia de Mira",
-    "latitude": 40.4500,
-    "longitude": -8.8000,
-    "regiao": "Centro",
-    "municipio": "Mira",
-    "bandeiraAzul": true,
-    "tipo": "Turística"
-  },
-  {
-    "nome": "Praia de Santa Cruz",
-    "latitude": 39.1300,
-    "longitude": -9.3800,
-    "regiao": "Lisboa e Oeste",
-    "municipio": "Torres Vedras",
-    "bandeiraAzul": true,
-    "tipo": "Familiar"
-  },
-  {
-    "nome": "Praia do Barril",
-    "latitude": 37.0800,
-    "longitude": -7.6600,
-    "regiao": "Algarve",
-    "municipio": "Tavira",
-    "bandeiraAzul": true,
-    "tipo": "Naturista"
-  },
-  {
-    "nome": "Praia da Zambujeira do Mar",
-    "latitude": 37.5200,
-    "longitude": -8.7900,
-    "regiao": "Alentejo",
-    "municipio": "Odemira",
-    "bandeiraAzul": true,
-    "tipo": "Turística"
-  },
-  {
-    "nome": "Praia Formosa",
-    "latitude": 32.6500,
-    "longitude": -16.9000,
-    "regiao": "Madeira",
-    "municipio": "Funchal",
-    "bandeiraAzul": true,
-    "tipo": "Urbana"
-  },
-  {
-    "nome": "Praia da Aguda",
-    "latitude": 41.0500,
-    "longitude": -8.6500,
-    "regiao": "Norte",
-    "municipio": "Vila Nova de Gaia",
-    "bandeiraAzul": true,
-    "tipo": "Familiar"
-  },
-  {
-    "nome": "Praia do Cabedelo",
-    "latitude": 41.5300,
-    "longitude": -8.7700,
-    "regiao": "Norte",
-    "municipio": "Viana do Castelo",
-    "bandeiraAzul": true,
-    "tipo": "Surf"
-  },
-  {
-    "nome": "Praia da Costa Nova",
-    "latitude": 40.6200,
-    "longitude": -8.7400,
-    "regiao": "Centro",
-    "municipio": "Ílhavo",
-    "bandeiraAzul": true,
-    "tipo": "Turística"
-  },
-  {
-    "nome": "Praia do Meco",
-    "latitude": 38.4900,
-    "longitude": -9.1800,
-    "regiao": "Lisboa e Vale do Tejo",
-    "municipio": "Sesimbra",
-    "bandeiraAzul": false,
-    "tipo": "Naturista"
-  },
-  {
-    "nome": "Praia da Luz",
-    "latitude": 37.0900,
-    "longitude": -8.7300,
-    "regiao": "Algarve",
-    "municipio": "Lagos",
-    "bandeiraAzul": true,
-    "tipo": "Familiar"
-  },
-  {
-    "nome": "Praia do Baleal",
-    "latitude": 39.3700,
-    "longitude": -9.3300,
-    "regiao": "Centro",
-    "municipio": "Peniche",
-    "bandeiraAzul": true,
-    "tipo": "Surf"
-  },
-  {
-    "nome": "Praia do Porto Santo",
-    "latitude": 33.0700,
-    "longitude": -16.3300,
-    "regiao": "Madeira",
-    "municipio": "Porto Santo",
-    "bandeiraAzul": true,
-    "tipo": "Turística"
-  }
-];
+    const icons = {
+      Surf: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/861/861512.png', iconSize: [30, 30], iconAnchor: [15, 30] }),
+      Urbana: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/235/235861.png', iconSize: [30, 30], iconAnchor: [15, 30] }),
+      Familiar: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/3062/3062634.png', iconSize: [30, 30], iconAnchor: [15, 30] }),
+      Naturista: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/168/168882.png', iconSize: [30, 30], iconAnchor: [15, 30] }),
+      Turística: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/854/854894.png', iconSize: [30, 30], iconAnchor: [15, 30] }),
+      Isolada: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [30, 30], iconAnchor: [15, 30] })
+    };
 
-    praias.forEach(praia => {
-      L.marker([praia.latitude, praia.longitude])
-        .addTo(map)
-        .bindPopup(`<strong>${praia.nome}</strong><br>${praia.municipio}, ${praia.regiao}<br>Tipo: ${praia.tipo}<br>Bandeira Azul: ${praia.bandeiraAzul ? '✅' : '❌'}`);
-    });
+    const praias = [/* insere aqui o JSON das praias */];
+    const marcadores = [];
+
+    function mostrarPraias(lista) {
+      marcadores.forEach(m => map.removeLayer(m));
+      marcadores.length = 0;
+
+      lista.forEach(praia => {
+        const icon = icons[praia.tipo] || icons.Urbana;
+        const marker = L.marker([praia.latitude, praia.longitude], { icon }).addTo(map);
+        marker.bindPopup(`<strong>${praia.nome}</strong><br>${praia.municipio}, ${praia.regiao}<br>Tipo: ${praia.tipo}<br>Bandeira Azul: ${praia.bandeiraAzul ? '✅' : '❌'}`);
+        marcadores.push(marker);
+      });
+    }
+
+    function filtrarPraias() {
+      const regiao = document.getElementById('regiaoSelect').value;
+      const tipo = document.getElementById('tipoSelect').value;
+      const bandeira = document.getElementById('bandeiraSelect').value;
+
+      const filtradas = praias.filter(p => {
+        const r = regiao === 'Todas' || p.regiao === regiao;
+        const t = tipo === 'Todos' || p.tipo === tipo;
+        const b = bandeira === 'Todas' || String(p.bandeiraAzul) === bandeira;
+        return r && t && b;
+      });
+
+      mostrarPraias(filtradas);
+    }
+
+    mostrarPraias(praias);
   </script>
 </body>
 </html>
