@@ -1,31 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mapa de Marés</title>
+  <title>Mapa de Marés em Portugal</title>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <style>#map { height: 600px; }</style>
+  <style>
+    #map { height: 100vh; }
+  </style>
 </head>
 <body>
   <div id="map"></div>
+
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([38.7, -9.15], 8); // Lisboa
+    const map = L.map('map').setView([39.5, -8.0], 7); // Centro de Portugal
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Exemplo de ponto com dados de maré
-    const dadosMare = {
-      local: "Lisboa",
-      preiaMar: "04:13",
-      baixaMar: "10:45",
-      altura: "3.4 m"
-    };
+    const locais = [
+      { nome: "Lisboa", lat: 38.7169, lon: -9.1399 },
+      { nome: "Cascais", lat: 38.6979, lon: -9.4204 },
+      { nome: "Costa da Caparica", lat: 38.6333, lon: -9.2333 },
+      { nome: "Setúbal", lat: 38.5244, lon: -8.8926 },
+      { nome: "Sines", lat: 37.9561, lon: -8.8691 },
+      { nome: "Peniche", lat: 39.3558, lon: -9.3811 },
+      { nome: "Ericeira", lat: 38.9667, lon: -9.4167 },
+      { nome: "Figueira da Foz", lat: 40.1500, lon: -8.8667 },
+      { nome: "Aveiro", lat: 40.6405, lon: -8.6538 },
+      { nome: "Porto", lat: 41.1496, lon: -8.6109 },
+      { nome: "Viana do Castelo", lat: 41.6935, lon: -8.8329 },
+      { nome: "Portimão", lat: 37.1333, lon: -8.5333 },
+      { nome: "Tavira", lat: 37.1259, lon: -7.6455 },
+      { nome: "Ponta Delgada", lat: 37.7412, lon: -25.6756 },
+      { nome: "Funchal", lat: 32.6669, lon: -16.9241 }
+    ];
 
-    L.marker([38.7, -9.15]).addTo(map)
-      .bindPopup(`<b>${dadosMare.local}</b><br>Preia-mar: ${dadosMare.preiaMar}<br>Baixa-mar: ${dadosMare.baixaMar}<br>Altura: ${dadosMare.altura}`);
+    locais.forEach(local => {
+      const popupContent = `
+        <strong>${local.nome}</strong><br>
+        Preia-mar: 14:32<br>
+        Baixa-mar: 08:12<br>
+        Altura atual: 1.2m<br>
+        <a href="https://tabuademares.com/pt/${local.nome.toLowerCase().replace(/ /g, '-')}" target="_blank">Ver mais</a>
+      `;
+      L.marker([local.lat, local.lon]).addTo(map)
+        .bindPopup(popupContent);
+    });
   </script>
 </body>
 </html>
