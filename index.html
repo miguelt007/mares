@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard de Marés</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e0f7fa;
+      padding: 20px;
+    }
+    h1 {
+      color: #00796b;
+    }
+    .tide-info {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌊 Marés em Almada</h1>
+  <div class="tide-info" id="tideData">
+    A carregar dados de marés...
+  </div>
+
+  <script>
+    const latitude = 38.68;  // Almada
+    const longitude = -9.15;
+    const apiKey = 'YOUR_API_KEY'; // Substituir com chave da API
+
+    fetch(`https://www.worldtides.info/api/v2?heights&lat=${latitude}&lon=${longitude}&key=${apiKey}`)
+      .then(response => response.json())
+      .then(data => {
+        const tideDiv = document.getElementById('tideData');
+        if (data.heights) {
+          tideDiv.innerHTML = '<h2>Próximas Marés</h2><ul>' +
+            data.heights.slice(0, 6).map(tide => {
+              const date = new Date(tide.date);
+              return `<li>${date.toLocaleString('pt-PT')} — ${tide.height.toFixed(2)} m</li>`;
+            }).join('') + '</ul>';
+        } else {
+          tideDiv.innerHTML = 'Não foi possível obter dados de marés.';
+        }
+      })
+      .catch(error => {
+        document.getElementById('tideData').innerText = 'Erro ao carregar dados.';
+        console.error(error);
+      });
+  </script>
+</body>
+</html>
