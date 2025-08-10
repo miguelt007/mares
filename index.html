@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <title>Dashboard Meteorológico - Carcavelos</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f0f8ff; padding: 20px; }
-    h1 { color: #005f73; }
+    body { font-family: Arial, sans-serif; background: #eef; padding: 20px; }
+    h1 { color: #0077b6; }
     .card { background: #fff; padding: 15px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
   </style>
 </head>
@@ -14,24 +14,34 @@
   <div id="weather"></div>
 
   <script>
-    const apiKey = 'dbcf86698cmshd04b1b46934dd15p11474ejsn267bbdb81678'; // Substitui pela tua chave
-    const station = '08536'; // Estação meteorológica próxima de Carcavelos
+    const rapidApiKey = '55dc5dcad5f71226674e70f9e02c4a7c4f0b3306d43cb0e458b1721953c8f877'; // Substitui pela tua chave
+    const today = new Date().toISOString().split('T')[0];
+
+    const url = `https://meteostat.p.rapidapi.com/point/daily?lat=38.676&lon=-9.325&start=${today}&end=${today}`;
+
+    const options = {
+      method: 'GET',
+      headers: {
+        'X-RapidAPI-Key': rapidApiKey,
+        'X-RapidAPI-Host': 'meteostat.p.rapidapi.com'
+      }
+    };
 
     async function getWeather() {
-      const today = new Date().toISOString().split('T')[0];
-      const url = `https://api.meteostat.net/v2/point/daily?lat=38.676&lon=-9.325&start=${today}&end=${today}`;
-      
-      const response = await fetch(url, {
-        headers: { 'x-api-key': apiKey }
-      });
-      const data = await response.json();
-      const weather = data.data[0];
+      try {
+        const response = await fetch(url, options);
+        const result = await response.json();
+        const weather = result.data[0];
 
-      document.getElementById('weather').innerHTML = `
-        <div class="card">🌡️ <strong>Temperatura média:</strong> ${weather.tavg}°C</div>
-        <div class="card">💨 <strong>Vento médio:</strong> ${weather.wspd} km/h</div>
-        <div class="card">🌫️ <strong>Pressão:</strong> ${weather.pres} hPa</div>
-      `;
+        document.getElementById('weather').innerHTML = `
+          <div class="card">🌡️ <strong>Temperatura média:</strong> ${weather.tavg ?? 'N/A'}°C</div>
+          <div class="card">💨 <strong>Vento médio:</strong> ${weather.wspd ?? 'N/A'} km/h</div>
+          <div class="card">🌫️ <strong>Pressão:</strong> ${weather.pres ?? 'N/A'} hPa</div>
+        `;
+      } catch (error) {
+        document.getElementById('weather').innerHTML = `<div class="card">Erro ao obter dados meteorológicos.</div>`;
+        console.error(error);
+      }
     }
 
     getWeather();
