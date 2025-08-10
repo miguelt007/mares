@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>Dashboard Meteorológico - Carcavelos</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #eef;
       padding: 20px;
-      max-width: 600px;
+      max-width: 800px;
       margin: auto;
     }
     h1 {
@@ -23,21 +24,26 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       font-size: 1.1em;
     }
+    canvas {
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
-  <h1>🌤️ Tempo em Carcavelos (Ontem)</h1>
+  <h1>📊 Tempo em Carcavelos (Últimos 7 dias)</h1>
   <div id="weather"></div>
+  <canvas id="weatherChart"></canvas>
 
   <script>
     const rapidApiKey = 'dbcf86698cmshd04b1b46934dd15p11474ejsn267bbdb81678';
 
-    // Usar a data de ontem
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const dateStr = yesterday.toISOString().split('T')[0];
+    const today = new Date();
+    const endDate = today.toISOString().split('T')[0];
+    const startDateObj = new Date();
+    startDateObj.setDate(today.getDate() - 6);
+    const startDate = startDateObj.toISOString().split('T')[0];
 
-    const url = `https://meteostat.p.rapidapi.com/point/daily?lat=38.676&lon=-9.325&start=${dateStr}&end=${dateStr}`;
+    const url = `https://meteostat.p.rapidapi.com/point/daily?lat=38.676&lon=-9.325&start=${startDate}&end=${endDate}`;
 
     const options = {
       method: 'GET',
@@ -51,18 +57,65 @@
       try {
         const response = await fetch(url, options);
         const result = await response.json();
-        const weather = result.data[0];
+        const data = result.data;
 
-        if (!weather) {
-          document.getElementById('weather').innerHTML = `<div class="card">⚠️ Dados não disponíveis para ${dateStr}.</div>`;
+        if (!data || data.length === 0) {
+          document.getElementById('weather').innerHTML = `<div class="card">⚠️ Dados não disponíveis.</div>`;
           return;
         }
 
+        // Mostrar dados do último dia
+        const latest = data[data.length - 1];
         document.getElementById('weather').innerHTML = `
-          <div class="card">🌡️ <strong>Temperatura média:</strong> ${weather.tavg ?? 'N/A'}°C</div>
-          <div class="card">💨 <strong>Vento médio:</strong> ${weather.wspd ?? 'N/A'} km/h</div>
-          <div class="card">🌫️ <strong>Pressão:</strong> ${weather.pres ?? 'N/A'} hPa</div>
+          <div class="card">🌡️ <strong>Temperatura média:</strong> ${latest.tavg ?? 'N/A'}°C</div>
+          <div class="card">💨 <strong>Vento médio:</strong> ${latest.wspd ?? 'N/A'} km/h</div>
+          <div class="card">🌫️ <strong>Pressão:</strong> ${latest.pres ?? 'N/A'} hPa</div>
         `;
+
+        // Preparar dados para o gráfico
+        const labels = data.map(d => d.date);
+        const temps = data.map(d => d.tavg ?? null);
+        const wind = data.map(d => d.wspd ?? null);
+        const pressure = data.map(d => d.pres ?? null);
+
+        const ctx = document.getElementById('weatherChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Temperatura (°C)',
+                data: temps,
+                borderColor: '#e63946',
+                backgroundColor: 'rgba(230,57,70,0.2)',
+                fill: true
+              },
+              {
+                label: 'Vento (km/h)',
+                data: wind,
+                borderColor: '#457b9d',
+                backgroundColor: 'rgba(69,123,157,0.2)',
+                fill: true
+              },
+              {
+                label: 'Pressão (hPa)',
+                data: pressure,
+                borderColor: '#2a9d8f',
+                backgroundColor: 'rgba(42,157,143,0.2)',
+                fill: true
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'top' },
+              title: { display: true, text: 'Últimos 7 dias' }
+            }
+          }
+        });
+
       } catch (error) {
         document.getElementById('weather').innerHTML = `<div class="card">❌ Erro ao obter dados meteorológicos.</div>`;
         console.error(error);
