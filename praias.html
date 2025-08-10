@@ -2,13 +2,12 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title>Marés nas Praias de Portugal</title>
+  <title>🌊 Marés nas Praias de Portugal</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      transition: background 0.3s, color 0.3s;
     }
     #map {
       height: 500px;
@@ -21,12 +20,6 @@
       padding: 15px;
       margin-bottom: 15px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      transition: background 0.3s, color 0.3s;
-    }
-    .emoji-icon {
-      font-size: 28px;
-      text-align: center;
-      line-height: 32px;
     }
     #controls {
       display: flex;
@@ -35,59 +28,18 @@
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
-    #toggle {
-      padding: 8px 16px;
-      font-size: 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
     #lua {
-  font-size: 20px;
-  font-weight: bold;
-  padding: 6px 12px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.05);
-}
-.light #lua {
-  color: #0077b6;
-  background: rgba(0, 119, 182, 0.1);
-}
-.dark #lua {
-  color: #00b4d8;
-  background: rgba(0, 180, 216, 0.2);
-}
-   .body.light {
-      background: #f0f8ff;
-      color: #000;
-    }
-    .light .praia {
-      background: #ffffff;
-      border: 1px solid #ccc;
-    }
-    .light #toggle {
-      background: #0077b6;
-      color: #fff;
-    }
-
-    body.dark {
-      background: #1e1e1e;
-      color: #f0f0f0;
-    }
-    .dark .praia {
-      background: #2c2c2c;
-      border: 1px solid #444;
-    }
-    .dark #toggle {
-      background: #00b4d8;
-      color: #000;
+      font-size: 20px;
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.05);
     }
   </style>
 </head>
-<body class="light">
+<body>
   <div id="controls">
     <h1>🌊 Marés nas Praias de Portugal</h1>
-    <button id="toggle">Modo Escuro</button>
     <div id="lua">🌕 Lua Cheia (100%)</div>
   </div>
   <div id="map"></div>
@@ -96,30 +48,27 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const locais = [
-      { nome: "Lisboa", distrito: "lisboa", lat: 38.7169, lon: -9.1399, preia: "02:02", baixa: "07:09", altura: "2.72m" },
-      { nome: "Cascais", distrito: "lisboa", lat: 38.6979, lon: -9.4204, preia: "02:10", baixa: "07:18", altura: "2.65m" },
-      { nome: "Costa da Caparica", distrito: "setubal", lat: 38.6333, lon: -9.2333, preia: "02:05", baixa: "07:12", altura: "2.70m" },
-      { nome: "Setúbal", distrito: "setubal", lat: 38.5244, lon: -8.8926, preia: "02:15", baixa: "07:25", altura: "2.60m" },
-      { nome: "Sines", distrito: "setubal", lat: 37.9561, lon: -8.8691, preia: "02:20", baixa: "07:30", altura: "2.55m" },
-      { nome: "Peniche", distrito: "leiria", lat: 39.3558, lon: -9.3811, preia: "01:58", baixa: "07:05", altura: "2.75m" },
-      { nome: "Ericeira", distrito: "lisboa", lat: 38.9667, lon: -9.4167, preia: "02:00", baixa: "07:08", altura: "2.73m" },
-      { nome: "Figueira da Foz", distrito: "coimbra", lat: 40.1500, lon: -8.8667, preia: "01:50", baixa: "07:00", altura: "2.80m" },
-      { nome: "Aveiro", distrito: "aveiro", lat: 40.6405, lon: -8.6538, preia: "01:45", baixa: "06:55", altura: "2.85m" },
-      { nome: "Porto", distrito: "porto", lat: 41.1496, lon: -8.6109, preia: "01:40", baixa: "06:50", altura: "2.90m" },
-      { nome: "Viana do Castelo", distrito: "viana-do-castelo", lat: 41.6935, lon: -8.8329, preia: "01:35", baixa: "06:45", altura: "2.92m" },
-      { nome: "Portimão", distrito: "faro", lat: 37.1333, lon: -8.5333, preia: "02:25", baixa: "07:35", altura: "2.50m" },
-      { nome: "Tavira", distrito: "faro", lat: 37.1259, lon: -7.6455, preia: "02:30", baixa: "07:40", altura: "2.45m" },
-      { nome: "Ponta Delgada", distrito: "acores", lat: 37.7412, lon: -25.6756, preia: "03:00", baixa: "08:00", altura: "2.20m" },
-      { nome: "Funchal", distrito: "madeira", lat: 32.6669, lon: -16.9241, preia: "03:10", baixa: "08:10", altura: "2.10m" }
+      { nome: "Lisboa", distrito: "lisboa", lat: 38.7169, lon: -9.1399 },
+      { nome: "Cascais", distrito: "lisboa", lat: 38.6979, lon: -9.4204 },
+      { nome: "Costa da Caparica", distrito: "setubal", lat: 38.6333, lon: -9.2333 },
+      { nome: "Setúbal", distrito: "setubal", lat: 38.5244, lon: -8.8926 },
+      { nome: "Sines", distrito: "setubal", lat: 37.9561, lon: -8.8691 },
+      { nome: "Peniche", distrito: "leiria", lat: 39.3558, lon: -9.3811 },
+      { nome: "Ericeira", distrito: "lisboa", lat: 38.9667, lon: -9.4167 },
+      { nome: "Figueira da Foz", distrito: "coimbra", lat: 40.1500, lon: -8.8667 },
+      { nome: "Aveiro", distrito: "aveiro", lat: 40.6405, lon: -8.6538 },
+      { nome: "Porto", distrito: "porto", lat: 41.1496, lon: -8.6109 },
+      { nome: "Viana do Castelo", distrito: "viana-do-castelo", lat: 41.6935, lon: -8.8329 },
+      { nome: "Portimão", distrito: "faro", lat: 37.1333, lon: -8.5333 },
+      { nome: "Tavira", distrito: "faro", lat: 37.1259, lon: -7.6455 },
+      { nome: "Ponta Delgada", distrito: "acores", lat: 37.7412, lon: -25.6756 },
+      { nome: "Funchal", distrito: "madeira", lat: 32.6669, lon: -16.9241 }
     ];
 
     const map = L.map('map').setView([39.5, -8], 6);
-    let tileClaro = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
-    let tileEscuro = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; CartoDB'
-    });
 
     const ondaIcon = L.divIcon({
       html: '🌊',
@@ -129,49 +78,55 @@
       popupAnchor: [0, -32]
     });
 
-    locais.forEach(local => {
+    async function obterMare(lat, lon) {
+      const apiKey = 'A_TUA_CHAVE_API'; // substitui pela tua chave
+      const url = `https://www.worldtides.info/api/v2?extremes&lat=${lat}&lon=${lon}&key=${apiKey}`;
+      try {
+        const resposta = await fetch(url);
+        const dados = await resposta.json();
+        const extremos = dados.extremes;
+
+        const preia = extremos.find(e => e.type === "High");
+        const baixa = extremos.find(e => e.type === "Low");
+
+        return {
+          preia: preia ? new Date(preia.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "—",
+          baixa: baixa ? new Date(baixa.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "—",
+          altura: preia ? `${preia.height.toFixed(2)}m` : "—"
+        };
+      } catch (erro) {
+        console.error("Erro ao obter dados da maré:", erro);
+        return { preia: "—", baixa: "—", altura: "—" };
+      }
+    }
+
+    locais.forEach(async local => {
+      const dadosMare = await obterMare(local.lat, local.lon);
       const nomeFormatado = local.nome.toLowerCase().replace(/ /g, '-');
       const link = `https://tabuademares.com/pt/${local.distrito}/${nomeFormatado}`;
+
       L.marker([local.lat, local.lon], { icon: ondaIcon })
         .addTo(map)
         .bindPopup(`<strong>${local.nome}</strong><br>
-                    Preia-mar: ${local.preia}<br>
-                    Baixa-mar: ${local.baixa}<br>
+                    Preia-mar: ${dadosMare.preia}<br>
+                    Baixa-mar: ${dadosMare.baixa}<br>
                     <a href="${link}" target="_blank">Ver maré</a>`);
+
       const div = document.createElement("div");
       div.className = "praia";
       div.innerHTML = `
         <h2>${local.nome}</h2>
         <p><strong>📍 Coordenadas:</strong> ${local.lat}, ${local.lon}</p>
-        <p><strong>🌊 Preia-mar:</strong> ${local.preia} &nbsp; | &nbsp; <strong>Baixa-mar:</strong> ${local.baixa}</p>
-        <p><strong>📏 Altura da maré:</strong> ${local.altura}</p>
+        <p><strong>🌊 Preia-mar:</strong> ${dadosMare.preia} &nbsp; | &nbsp; <strong>Baixa-mar:</strong> ${dadosMare.baixa}</p>
+        <p><strong>📏 Altura da maré:</strong> ${dadosMare.altura}</p>
         <p><a href="${link}" target="_blank">🔗 Ver detalhes da maré</a></p>
       `;
       document.getElementById("praias").appendChild(div);
     });
 
-        // Alternância de modo
-    const toggleBtn = document.getElementById("toggle");
-    toggleBtn.addEventListener("click", () => {
-      const body = document.body;
-      const isLight = body.classList.contains("light");
-      if (isLight) {
-        body.classList.replace("light", "dark");
-        toggleBtn.textContent = "Modo Claro";
-        map.removeLayer(tileClaro);
-        tileEscuro.addTo(map);
-      } else {
-        body.classList.replace("dark", "light");
-        toggleBtn.textContent = "Modo Escuro";
-        map.removeLayer(tileEscuro);
-        tileClaro.addTo(map);
-      }
-    });
-
-    // Fase da Lua automática com emoji, nome e percentagem
     function calcularFaseLua() {
       const hoje = new Date();
-      const novaLua = new Date(Date.UTC(2000, 0, 6, 18, 14)); // referência: Lua Nova
+      const novaLua = new Date(Date.UTC(2000, 0, 6, 18, 14));
       const diff = hoje.getTime() - novaLua.getTime();
       const dias = diff / 1000 / 86400;
       const fase = (dias % 29.530588853);
