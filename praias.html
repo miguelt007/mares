@@ -67,9 +67,9 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // 🌊 Ícone personalizado de onda
+    // 🌊 Emoji como ícone
     const ondaIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2933/2933186.png',
+      iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Emoji_u1f30a.svg',
       iconSize: [32, 32],
       iconAnchor: [16, 32],
       popupAnchor: [0, -32]
@@ -79,7 +79,7 @@
       const nomeFormatado = local.nome.toLowerCase().replace(/ /g, '-');
       const link = `https://tabuademares.com/pt/${local.distrito}/${nomeFormatado}`;
 
-      // Marcador com ícone de onda
+      // Marcador com emoji 🌊
       L.marker([local.lat, local.lon], { icon: ondaIcon })
         .addTo(map)
         .bindPopup(`<strong>${local.nome}</strong><br>
