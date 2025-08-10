@@ -7,7 +7,8 @@
   <style>
     #map { height: 100vh; }
     .popup-content { font-size: 14px; }
-    .forecast { margin-top: 10px; }
+    .forecast { margin-top: 10px; font-size: 13px; background: #eef; padding: 8px; border-radius: 6px; }
+    button { margin-top: 5px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -15,6 +16,8 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
+    const apiKey = 'bc935843-d537-441f-8524-c2cf2150f46d'; // 🔑 Substitui pela tua chave da Stormglass
+
     const map = L.map('map').setView([38.7, -9.3], 11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
@@ -34,38 +37,49 @@
     praias.forEach(praia => {
       const marker = L.marker([praia.lat, praia.lon]).addTo(map);
       const popupContent = `
-        <div class="popup-content">
+        <div class="popup-content" id="popup-${praia.nome.replace(/\s+/g, '')}">
           <strong>${praia.nome}</strong><br>
-          <button onclick="verPrevisao(${praia.lat}, ${praia.lon}, this)">Ver Previsão</button>
-          <div class="forecast"></div>
+          <button onclick="verPrevisao(${praia.lat}, ${praia.lon}, '${praia.nome}')">Ver Previsão</button>
+          <div class="forecast" id="forecast-${praia.nome.replace(/\s+/g, '')}"></div>
         </div>
       `;
       marker.bindPopup(popupContent);
     });
 
-    async function verPrevisao(lat, lon, btn) {
-      const forecastDiv = btn.nextElementSibling;
-      forecastDiv.innerHTML = "A carregar...";
+    async function verPrevisao(lat, lon, nome) {
+      const forecastDiv = document.getElementById(`forecast-${nome.replace(/\s+/g, '')}`);
+      forecastDiv.innerHTML = "🔄 A carregar...";
 
       try {
         const response = await fetch(`https://api.stormglass.io/v2/weather/point?lat=${lat}&lng=${lon}&params=waveHeight,windSpeed,airTemperature,waterTemperature`, {
           headers: {
-            'Authorization': '3cbe21f4-75eb-11f0-8df7-0242ac130006-3cbe2258-75eb-11f0-8df7-0242ac130006'
+            'Authorization': apiKey
           }
         });
+
+        if (!response.ok) {
+          forecastDiv.innerHTML = `❌ Erro ${response.status}: ${response.statusText}`;
+          return;
+        }
+
         const data = await response.json();
-        const hora = data.hours[0];
+        const hora = data.hours?.[0];
+
+        if (!hora) {
+          forecastDiv.innerHTML = "⚠️ Sem dados disponíveis para esta hora.";
+          return;
+        }
 
         forecastDiv.innerHTML = `
-          <div><strong>Previsão:</strong></div>
-          🌊 Altura das ondas: ${hora.waveHeight?.noaa ?? 'N/D'} m<br>
+          <strong>🌤️ Previsão:</strong><br>
+          🌊 Ondas: ${hora.waveHeight?.noaa ?? 'N/D'} m<br>
           💨 Vento: ${hora.windSpeed?.noaa ?? 'N/D'} m/s<br>
-          🌡️ Temp. do ar: ${hora.airTemperature?.noaa ?? 'N/D'} °C<br>
-          🌊 Temp. da água: ${hora.waterTemperature?.noaa ?? 'N/D'} °C
+          🌡️ Ar: ${hora.airTemperature?.noaa ?? 'N/D'} °C<br>
+          🌊 Água: ${hora.waterTemperature?.noaa ?? 'N/D'} °C
         `;
       } catch (error) {
-        forecastDiv.innerHTML = "Erro ao obter previsão.";
-        console.error(error);
+        forecastDiv.innerHTML = "❌ Erro ao obter previsão.";
+        console.error("Erro na chamada à Stormglass API:", error);
       }
     }
   </script>
