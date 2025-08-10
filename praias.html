@@ -20,12 +20,27 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    const marIcon = L.icon({
+    const marAltaIcon = L.icon({
       iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
       iconSize: [32, 32],
       iconAnchor: [16, 32],
       popupAnchor: [0, -32]
     });
+
+    const marBaixaIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2933/2933825.png',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
+    });
+
+    function horaParaMinutos(horaStr) {
+      const [h, m] = horaStr.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    const agora = new Date();
+    const horaAtualMin = agora.getHours() * 60 + agora.getMinutes();
 
     const locais = [
       { nome: "Lisboa", lat: 38.7169, lon: -9.1399, preia: "02:02", baixa: "07:09", altura: "2.72m" },
@@ -46,14 +61,24 @@
     ];
 
     locais.forEach(local => {
+      const preiaMin = horaParaMinutos(local.preia);
+      const baixaMin = horaParaMinutos(local.baixa);
+
+      const diffPreia = Math.abs(horaAtualMin - preiaMin);
+      const diffBaixa = Math.abs(horaAtualMin - baixaMin);
+
+      const estaEm = diffPreia < diffBaixa ? "Maré Alta" : "Maré Baixa";
+      const iconEscolhido = diffPreia < diffBaixa ? marAltaIcon : marBaixaIcon;
+
       const popupContent = `
         <strong>${local.nome}</strong><br>
+        Estado atual: <b>${estaEm}</b><br>
         Preia-mar: ${local.preia}<br>
         Baixa-mar: ${local.baixa}<br>
         Altura atual: ${local.altura}<br>
         <a href="https://tabuademares.com/pt/${local.nome.toLowerCase().replace(/ /g, '-')}" target="_blank">Ver mais</a>
       `;
-      L.marker([local.lat, local.lon], { icon: marIcon }).addTo(map)
+      L.marker([local.lat, local.lon], { icon: iconEscolhido }).addTo(map)
         .bindPopup(popupContent);
     });
   </script>
