@@ -139,7 +139,9 @@
       const filtradas = praias.filter(p => {
         const r = regiao === 'Todas' || p.regiao === regiao;
         const t = tipo === 'Todos' || p.tipo === tipo;
-        const b = bandeira === 'Todas' || String(p.bandeiraAzul) === bandeira;
+        const b = bandeira === 'Todas' ||
+                  (bandeira === 'true' && p.bandeiraAzul === true) ||
+                  (bandeira === 'false' && p.bandeiraAzul === false);
         return r && t && b;
       });
 
